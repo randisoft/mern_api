@@ -21,17 +21,6 @@ const createTask = asyncHandler(async(req, res) => {
     res.status(200).json(task)
 })
 
-const user = await User.findById(req, res.id)
-
-if (!user) {
-    res.status(401)
-    throw new Error('User not found')
-}
-
-if (task.user.toString() !== user.id) {
-    res.status(401)
-    throw new Error('Unauthorized to access tasks')
-}
 
 const updateTask = asyncHandler(async(req, res) => {
     const task = await Task.findById(req.params.id)
@@ -39,6 +28,18 @@ const updateTask = asyncHandler(async(req, res) => {
     if (!task) {
         res.status(400)
         throw new Error('Task not found')
+    }
+
+    const user = await User.findById(req, res.id)
+
+    if (!user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    if (task.user.toString() !== user.id) {
+        res.status(401)
+        throw new Error('Unauthorized to access tasks')
     }
 
     const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {

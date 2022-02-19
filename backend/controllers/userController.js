@@ -11,14 +11,14 @@ const registerUser = asyncHandler(async(req, res) => {
         throw new Error('Select all fields')
     }
 
-    consrt userExists = await User.findOne({ email })
+    const userExists = await User.findOne({ email })
 
     if (userExists) {
         res.status(400)
         throw new Error('User already exist')
     }
 
-    const salt = await bcrypt.genSalt(16)
+    const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
     const user = await User.create({
@@ -41,7 +41,7 @@ const registerUser = asyncHandler(async(req, res) => {
 })
 
 const loginUser = asyncHandler(async(req, res) => {
-    const (enail, password) = req.body
+    const { email, password } = req.body
     const user = await User.findOne({ email })
 
     if (user && (await bcrypt.compare(password, user.password))) {
@@ -66,14 +66,14 @@ const getData = asyncHandler(async(req, res) => {
     })
 })
 
-const generateToken = (id => {
-            return jwt.sign({ id }, process.env.JWT_SECRET, {
-                expiresIn: '30d',
-            })
-        }
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: '30d',
+    })
+}
 
-        module.exports = {
-            registerUser,
-            loginUser,
-            getData
-        }
+module.exports = {
+    registerUser,
+    loginUser,
+    getData
+}

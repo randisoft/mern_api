@@ -4,14 +4,16 @@ const User = require('../models/userModel')
 
 const protect = asyncHandler(async(req, res, next) => {
     let token
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith('Bearer')
+    ) {
         try {
             token = req.headers.authorization.split(' ')[1]
 
-            const decipher = jwt.verify(token, process.env.JWT_SECRET).select('-password')
-
-            next()
-            req.user = awwait User.findById(decipher.id).select('-password')
+            const decipher = jwt.verify(token, process.env.JWT_SECRET)
+            req.user = await User.findById(decipher.id).select('-password')
             next()
         } catch (error) {
             console.log(error);
@@ -25,3 +27,5 @@ const protect = asyncHandler(async(req, res, next) => {
         throw new Error('No token found')
     }
 })
+
+module.exports = { protect }
