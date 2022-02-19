@@ -1,9 +1,10 @@
 const asyncHandler = require('express-async-handler')
 
 const Task = require('../models/taskModel')
+const User = require('../models/userModel')
 
 const getTasks = asyncHandler(async(req, res) => {
-    const tasks = await Task.find()
+    const tasks = await Task.find({ user: req.user.id })
     res.status(200).json(tasks)
 })
 
@@ -14,10 +15,23 @@ const createTask = asyncHandler(async(req, res) => {
     }
 
     const task = await Task.create({
-        text: req.body.text
+        text: req.body.text,
+        user: req.user.id
     })
     res.status(200).json(task)
 })
+
+const user = await User.findById(req, res.id)
+
+if (!user) {
+    res.status(401)
+    throw new Error('User not found')
+}
+
+if (task.user.toString() !== user.id) {
+    res.status(401)
+    throw new Error('Unauthorized to access tasks')
+}
 
 const updateTask = asyncHandler(async(req, res) => {
     const task = await Task.findById(req.params.id)
@@ -40,6 +54,18 @@ const deleteTask = asyncHandler(async(req, res) => {
     if (!task) {
         res.status(400)
         throw new Error('Task not found')
+    }
+
+    const user = await User.findById(req, res.id)
+
+    if (!user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    if (task.user.toString() !== user.id) {
+        res.status(401)
+        throw new Error('Unauthorized to access tasks')
     }
 
     await task.remove()
